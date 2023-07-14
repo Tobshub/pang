@@ -123,13 +123,15 @@ void UpdateGame(void) {
       // falling
       if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.v > 0) {
         ball.v *= -1;
-        ball.v > 0 ? ball.v -= G * 2 : ball.v += G * 2;
+        ball.v > 0 ? ball.v -= G * 2
+                   : ball.v += G * 2; // account for elasticity
       }
       if (ball.pos.x - (float)ball.r <= 0 ||
           ball.pos.y + (float)ball.r >= SCREEN_HEIGHT) {
         ball.angle *= -1;
       }
-      ball.pos.y = std::min<float>(ball.pos.y + ball.v, (float)SCREEN_HEIGHT);
+      ball.pos.y =
+          std::min<float>(ball.pos.y + ball.v, (float)SCREEN_HEIGHT - ball.r);
       ball.v += G;
     }
   }
