@@ -157,30 +157,41 @@ void UpdateGame(void) {
       }
     }
 
-    for (auto &ball : balls) {
+    for (std::vector<Ball>::iterator ball = balls.begin(); ball != balls.end();
+         ++ball) {
       if (CheckCollisionCircleRec(
-              ball.pos, ball.r,
+              ball->pos, ball->r,
               Rectangle{.x = player.pos.x,
                         .y = player.pos.y - player.size.height,
                         .width = player.size.width * 2,
                         .height = player.size.height})) {
         game_over = true;
+      } else if (CheckCollisionCircleRec(
+                     ball->pos, ball->r,
+                     Rectangle{.x = lazer.x,
+                               .y = SCREEN_HEIGHT - lazer.height,
+                               .width = 1,
+                               .height = lazer.height})) {
+        lazer.active = false;
+        balls.erase(ball);
+
       } else {
 
-        if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
-          ball.vv *= -1;
-          ball.vv > 0 ? ball.vv -= G *ELASTICITY
-                      : ball.vv += G * ELASTICITY; // account for elasticity
+        if (ball->pos.y + (float)ball->r >= SCREEN_HEIGHT && ball->vv > 0) {
+          ball->vv *= -1;
+          ball->vv > 0 ? ball->vv -= G *ELASTICITY
+                       : ball->vv += G * ELASTICITY; // account for elasticity
         }
-        if (ball.pos.x - (float)ball.r <= 0 ||
-            ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
-          ball.vh *= -1;
+        if (ball->pos.x - (float)ball->r <= 0 ||
+            ball->pos.x + (float)ball->r >= SCREEN_WIDTH) {
+          ball->vh *= -1;
         }
-        ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, ball.r),
-                    .y = std::min<float>(ball.pos.y + ball.vv,
-                                         (float)SCREEN_HEIGHT - ball.r)};
+        ball->pos = {
+            .x = std::max<float>(ball->pos.x + ball->vh, ball->r),
+            .y = std::min<float>(ball->pos.y + ball->vv,
+                                 (float)SCREEN_HEIGHT - (float)ball->r)};
 
-        ball.vv += G;
+        ball->vv += G;
       }
     }
   }
