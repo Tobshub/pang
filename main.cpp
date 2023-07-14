@@ -14,7 +14,7 @@ struct Player {
   bool can_shoot;
 };
 
-#define G 1.f
+#define G .5
 #define ELASTICITY 1.8f
 
 #define START_BALL_NUM 2
@@ -150,20 +150,30 @@ void UpdateGame(void) {
     }
 
     for (auto &ball : balls) {
-      if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
-        ball.vv *= -1;
-        ball.vv > 0 ? ball.vv -= G *ELASTICITY
-                    : ball.vv += G * ELASTICITY; // account for elasticity
-      }
-      if (ball.pos.x - (float)ball.r <= 0 ||
-          ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
-        ball.vh *= -1;
-      }
-      ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, ball.r),
-                  .y = std::min<float>(ball.pos.y + ball.vv,
-                                       (float)SCREEN_HEIGHT - ball.r)};
+      if (CheckCollisionCircleRec(
+              ball.pos, ball.r,
+              Rectangle{.x = player.pos.x,
+                        .y = player.pos.y - player.size.height,
+                        .width = player.size.width * 2,
+                        .height = player.size.height})) {
+        game_over = true;
+      } else {
 
-      ball.vv += G;
+        if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
+          ball.vv *= -1;
+          ball.vv > 0 ? ball.vv -= G *ELASTICITY
+                      : ball.vv += G * ELASTICITY; // account for elasticity
+        }
+        if (ball.pos.x - (float)ball.r <= 0 ||
+            ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
+          ball.vh *= -1;
+        }
+        ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, ball.r),
+                    .y = std::min<float>(ball.pos.y + ball.vv,
+                                         (float)SCREEN_HEIGHT - ball.r)};
+
+        ball.vv += G;
+      }
     }
   }
 }
