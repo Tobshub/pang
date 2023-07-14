@@ -161,9 +161,10 @@ void UpdateGame(void) {
     }
   } else {
     if (IsKeyPressed(KEY_LEFT) || IsKeyDown(KEY_LEFT)) {
-      player.pos.x -= PLAYER_SPEED;
+      player.pos.x = std::max<float>(player.pos.x - PLAYER_SPEED, 0.f);
     } else if (IsKeyPressed(KEY_RIGHT) || IsKeyDown(KEY_RIGHT)) {
-      player.pos.x += PLAYER_SPEED;
+      player.pos.x = std::min<float>(player.pos.x + PLAYER_SPEED,
+                                     SCREEN_WIDTH - player.size.width * 2);
     }
     if (IsKeyPressed(KEY_SPACE) && player.can_shoot) {
       ActivateLazer(player.pos.x + player.size.width);
