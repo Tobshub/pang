@@ -79,6 +79,7 @@ void InitGame(void) {
   SetTargetFPS(60);
 
   game_over = false;
+  has_won = false;
 
   player = Player{
       .pos = {.x = SCREEN_WIDTH / 2.f - player.size.width / 2,
@@ -191,6 +192,7 @@ void UpdateGame(void) {
                           .width = player.size.width * 2,
                           .height = player.size.height})) {
           game_over = true;
+          break;
         } else if (CheckCollisionCircleRec(
                        ball.pos, ball.r,
                        Rectangle{.x = lazer.x,
