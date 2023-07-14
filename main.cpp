@@ -26,7 +26,7 @@ struct Ball {
   float vh; // horizontal velocity
 };
 
-#define LAZER_SPEED 1
+#define LAZER_SPEED 5
 
 struct Lazer {
   float x;
@@ -78,6 +78,7 @@ void InitGame(void) {
   player.size = {.width = 12, .height = 30};
   player.pos = {.x = SCREEN_WIDTH / 2.f - player.size.width / 2,
                 .y = SCREEN_HEIGHT};
+  player.can_shoot = true;
 
   balls.clear();
 
@@ -125,6 +126,22 @@ void UpdateGame(void) {
       InitGame();
     }
   } else {
+    if (IsKeyPressed(KEY_SPACE) && player.can_shoot) {
+      player.can_shoot = false;
+      lazer.x = player.pos.x + player.size.width;
+      lazer.active = true;
+    }
+
+    if (lazer.active) {
+      if (lazer.height >= SCREEN_HEIGHT) {
+        lazer.active = false;
+        lazer.height = 0;
+        player.can_shoot = true;
+      } else {
+        lazer.height += LAZER_SPEED;
+      }
+    }
+
     for (auto &ball : balls) {
       if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
         ball.vv *= -1;
