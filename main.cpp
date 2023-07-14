@@ -77,10 +77,18 @@ void InitGame(void) {
 
   game_over = false;
 
-  player.size = {.width = 12, .height = 30};
-  player.pos = {.x = SCREEN_WIDTH / 2.f - player.size.width / 2,
-                .y = SCREEN_HEIGHT};
-  player.can_shoot = true;
+  player = Player{
+      .pos = {.x = SCREEN_WIDTH / 2.f - player.size.width / 2,
+              .y = SCREEN_HEIGHT},
+      .size = {.width = 12, .height = 30},
+      .can_shoot = true,
+  };
+
+  lazer = Lazer{
+      .x = 0,
+      .height = 0,
+      .active = false,
+  };
 
   balls.clear();
 
