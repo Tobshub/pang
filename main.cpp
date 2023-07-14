@@ -125,7 +125,7 @@ void DrawGame(void) {
   } else {
     for (auto &ball : balls) {
       if (ball.active) {
-        DrawCircleV(ball.pos, ball.r, GRAY);
+        DrawCircleV(ball.pos, ball.r, DARKGRAY);
       }
     }
 
