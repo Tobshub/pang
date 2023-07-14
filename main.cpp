@@ -12,7 +12,8 @@ struct Player {
   bool can_shoot;
 };
 
-#define G 1
+#define G 1.f
+#define ELASTICITY 1.8f
 
 #define START_BALL_NUM 2
 
@@ -21,8 +22,8 @@ enum BallSize { SMALL = 10, MEDIUM = 20, LARGE = 40 };
 struct Ball {
   BallSize r;
   Vector2 pos;
-  int angle;
-  int v;
+  float vv; // vertical velocity
+  float vh; // horizontal velocity
 };
 
 #define LAZER_SPEED 1
@@ -60,10 +61,14 @@ int main(void) {
 }
 
 float RandomFloat(float min, float max) {
-  return min + ((float)rand() / (float)RAND_MAX) * (max - min);
+  float n = 0.f;
+  while (n == 0.f) {
+    n = min + ((float)rand() / (float)RAND_MAX) * (max - min);
+  }
+  return n;
 }
 
-int RandomInt(int min, int max) { return min + (rand() % (max - min + 1)); }
+#define RANDOM_BALL_VH() RandomFloat(-5.f, 5.f)
 
 void InitGame(void) {
   SetTargetFPS(60);
@@ -77,13 +82,14 @@ void InitGame(void) {
   balls.clear();
 
   for (int i = 0; i < START_BALL_NUM; i++) {
-    balls.push_back(
-        Ball{.r = BallSize::LARGE,
-             .pos = Vector2{.x = RandomFloat(0 + BallSize::LARGE,
-                                             SCREEN_WIDTH - BallSize::LARGE),
-                            .y = SCREEN_HEIGHT / 4.f},
-             .angle = RandomInt(0, 180),
-             .v = 0});
+    balls.push_back(Ball{
+        .r = BallSize::LARGE,
+        .pos =
+            Vector2{.x = RandomFloat(0 + BallSize::LARGE,
+                                     SCREEN_WIDTH - BallSize::LARGE),
+                    .y = RandomFloat(0 + BallSize::LARGE, SCREEN_HEIGHT / 4.f)},
+        .vv = 0,
+        .vh = RANDOM_BALL_VH()});
   }
 }
 
@@ -120,19 +126,20 @@ void UpdateGame(void) {
     }
   } else {
     for (auto &ball : balls) {
-      // falling
-      if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.v > 0) {
-        ball.v *= -1;
-        ball.v > 0 ? ball.v -= G * 2
-                   : ball.v += G * 2; // account for elasticity
+      if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
+        ball.vv *= -1;
+        ball.vv > 0 ? ball.vv -= G *ELASTICITY
+                    : ball.vv += G * ELASTICITY; // account for elasticity
       }
       if (ball.pos.x - (float)ball.r <= 0 ||
-          ball.pos.y + (float)ball.r >= SCREEN_HEIGHT) {
-        ball.angle *= -1;
+          ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
+        ball.vh *= -1;
       }
-      ball.pos.y =
-          std::min<float>(ball.pos.y + ball.v, (float)SCREEN_HEIGHT - ball.r);
-      ball.v += G;
+      ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, ball.r),
+                  .y = std::min<float>(ball.pos.y + ball.vv,
+                                       (float)SCREEN_HEIGHT - ball.r)};
+
+      ball.vv += G;
     }
   }
 }
