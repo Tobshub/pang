@@ -73,7 +73,7 @@ float RandomNZFloat(float min, float max) {
   return n;
 }
 
-#define RANDOM_BALL_VH() RandomFloat(-5.f, 5.f)
+#define RANDOM_BALL_VH() RandomNZFloat(-5.f, 5.f)
 
 void InitGame(void) {
   SetTargetFPS(60);
