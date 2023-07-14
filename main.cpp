@@ -15,8 +15,8 @@ struct Player {
   bool can_shoot;
 };
 
-#define G .5
-#define ELASTICITY 1.8f
+#define G .4
+#define ELASTICITY 2.f
 
 #define START_BALL_NUM 2
 
@@ -30,7 +30,7 @@ struct Ball {
   bool active;
 };
 
-#define LAZER_SPEED 5
+#define LAZER_SPEED 8
 
 struct Lazer {
   float x;
@@ -39,7 +39,7 @@ struct Lazer {
 };
 
 static const int SCREEN_WIDTH = 800;
-static const int SCREEN_HEIGHT = 680;
+static const int SCREEN_HEIGHT = 480;
 
 static Player player = Player{};
 
