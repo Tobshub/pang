@@ -65,7 +65,7 @@ int main(void) {
   return 0;
 }
 
-float RandomFloat(float min, float max) {
+float RandomNZFloat(float min, float max) {
   float n = 0.f;
   while (n == 0.f) {
     n = min + ((float)rand() / (float)RAND_MAX) * (max - min);
@@ -97,15 +97,15 @@ void InitGame(void) {
   balls.clear();
 
   for (int i = 0; i < START_BALL_NUM; i++) {
-    balls.push_back(Ball{
-        .r = BallSize::LARGE,
-        .pos =
-            Vector2{.x = RandomFloat(0 + BallSize::LARGE,
-                                     SCREEN_WIDTH - BallSize::LARGE),
-                    .y = RandomFloat(0 + BallSize::LARGE, SCREEN_HEIGHT / 4.f)},
-        .vv = 0,
-        .vh = RANDOM_BALL_VH(),
-        .active = true});
+    balls.push_back(
+        Ball{.r = BallSize::LARGE,
+             .pos = Vector2{.x = RandomNZFloat(0 + BallSize::LARGE,
+                                               SCREEN_WIDTH - BallSize::LARGE),
+                            .y = RandomNZFloat(0 + BallSize::LARGE,
+                                               SCREEN_HEIGHT / 4.f)},
+             .vv = 0,
+             .vh = RANDOM_BALL_VH(),
+             .active = true});
   }
 }
 
