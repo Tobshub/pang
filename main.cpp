@@ -207,7 +207,6 @@ void UpdateGame(void) {
           // moving in opposite directions
           if (ball.r != BallSize::SMALL) {
             for (int i : {0, 1}) {
-              std::cout << "created new ball " << i << std::endl;
               balls.push_back(Ball{
                   .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
                                                  : BallSize::SMALL,
