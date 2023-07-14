@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 #include <raylib.h>
 #include <vector>
 
@@ -47,6 +48,7 @@ static std::vector<Ball> balls;
 static Lazer lazer = Lazer{.x = 0, .height = 0, .active = false};
 
 static bool game_over = false;
+static bool has_won = false;
 
 int main(void) {
 
@@ -111,7 +113,12 @@ void DrawGame(void) {
   ClearBackground(RAYWHITE);
 
   if (game_over) {
-    DrawText("GAME OVER", 300, 300, 24, RED);
+    if (has_won) {
+      DrawText("YOU WIN", 300, 300, 24, GREEN);
+    } else {
+      DrawText("GAME OVER", 300, 300, 24, RED);
+    }
+
   } else {
     for (auto &ball : balls) {
       if (ball.active) {
@@ -169,60 +176,67 @@ void UpdateGame(void) {
       }
     }
 
+    has_won = true;
+    game_over = true;
     for (auto &ball : balls) {
-      if (!ball.active)
-        continue;
+      if (ball.active) {
 
-      if (CheckCollisionCircleRec(
-              ball.pos, ball.r,
-              Rectangle{.x = player.pos.x,
-                        .y = player.pos.y - player.size.height,
-                        .width = player.size.width * 2,
-                        .height = player.size.height})) {
-        game_over = true;
-      } else if (CheckCollisionCircleRec(
-                     ball.pos, ball.r,
-                     Rectangle{.x = lazer.x,
-                               .y = SCREEN_HEIGHT - lazer.height,
-                               .width = 1,
-                               .height = lazer.height})) {
-        ResetLazer();
-        ball.active = false;
+        has_won = false;
+        game_over = false;
 
-        if (ball.r == BallSize::SMALL)
-          continue;
+        if (CheckCollisionCircleRec(
+                ball.pos, ball.r,
+                Rectangle{.x = player.pos.x,
+                          .y = player.pos.y - player.size.height,
+                          .width = player.size.width * 2,
+                          .height = player.size.height})) {
+          game_over = true;
+        } else if (CheckCollisionCircleRec(
+                       ball.pos, ball.r,
+                       Rectangle{.x = lazer.x,
+                                 .y = SCREEN_HEIGHT - lazer.height,
+                                 .width = 1,
+                                 .height = lazer.height})) {
+          ResetLazer();
+          ball.active = false;
 
-        // create a smaller ball on each side
-        // moving in opposite directions
-        for (int i : {0, 1}) {
-          balls.push_back(Ball{
-              .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
-                                             : BallSize::SMALL,
-              .pos = Vector2{.x = ball.pos.x + (i == 0 ? (-1 * (float)ball.r)
-                                                       : (float)ball.r),
-                             .y = ball.pos.y},
-              .vv = 0,
-              .vh = ball.vh * (i == 0        ? ball.vh > 0 ? -1 : 1
-                               : ball.vh > 0 ? 1
-                                             : -1),
-              .active = true});
+          if (ball.r == BallSize::SMALL)
+            continue;
+
+          // create a smaller ball on each side
+          // moving in opposite directions
+          for (int i : {0, 1}) {
+            std::cout << "created new ball " << i << std::endl;
+            balls.push_back(Ball{
+                .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
+                                               : BallSize::SMALL,
+                .pos = Vector2{.x = ball.pos.x + (i == 0 ? (-1 * (float)ball.r)
+                                                         : (float)ball.r),
+                               .y = ball.pos.y},
+                .vv = 0,
+                .vh = ball.vh * (i == 0        ? ball.vh > 0 ? -1 : 1
+                                 : ball.vh > 0 ? 1
+                                               : -1),
+                .active = true});
+          }
+        } else {
+
+          if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
+            ball.vv *= -1;
+            ball.vv > 0 ? ball.vv -= G *ELASTICITY
+                        : ball.vv += G * ELASTICITY; // account for elasticity
+          }
+          if (ball.pos.x - (float)ball.r <= 0 ||
+              ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
+            ball.vh *= -1;
+          }
+          ball.pos = {
+              .x = std::max<float>(ball.pos.x + ball.vh, ball.r),
+              .y = std::min<float>(ball.pos.y + ball.vv,
+                                   (float)SCREEN_HEIGHT - (float)ball.r)};
+
+          ball.vv += G;
         }
-      } else {
-
-        if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
-          ball.vv *= -1;
-          ball.vv > 0 ? ball.vv -= G *ELASTICITY
-                      : ball.vv += G * ELASTICITY; // account for elasticity
-        }
-        if (ball.pos.x - (float)ball.r <= 0 ||
-            ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
-          ball.vh *= -1;
-        }
-        ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, ball.r),
-                    .y = std::min<float>(ball.pos.y + ball.vv,
-                                         (float)SCREEN_HEIGHT - ball.r)};
-
-        ball.vv += G;
       }
     }
   }
