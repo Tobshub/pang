@@ -226,10 +226,12 @@ void UpdateGame(void) {
             ball.vv > 0 ? ball.vv -= G *ELASTICITY
                         : ball.vv += G * ELASTICITY; // account for elasticity
           }
+
           if (ball.pos.x - (float)ball.r <= 0 ||
               ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
             ball.vh *= -1;
           }
+
           ball.pos = {
               .x = std::max<float>(ball.pos.x + ball.vh, ball.r),
               .y = std::min<float>(ball.pos.y + ball.vv,
