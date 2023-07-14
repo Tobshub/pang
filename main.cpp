@@ -188,6 +188,25 @@ void UpdateGame(void) {
                                .height = lazer.height})) {
         ResetLazer();
         ball.active = false;
+
+        if (ball.r == BallSize::SMALL)
+          continue;
+
+        // create a smaller ball on each side
+        // moving in opposite directions
+        for (int i : {0, 1}) {
+          balls.push_back(Ball{
+              .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
+                                             : BallSize::SMALL,
+              .pos = Vector2{.x = ball.pos.x + (i == 0 ? (-1 * (float)ball.r)
+                                                       : (float)ball.r),
+                             .y = ball.pos.y},
+              .vv = 0,
+              .vh = ball.vh * (i == 0        ? ball.vh > 0 ? -1 : 1
+                               : ball.vh > 0 ? 1
+                                             : -1),
+              .active = true});
+        }
       } else {
 
         if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
