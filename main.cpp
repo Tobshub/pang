@@ -6,6 +6,8 @@ void InitGame(void);
 void UpdateGame(void);
 void DrawGame(void);
 
+#define PLAYER_SPEED 5
+
 struct Player {
   Vector2 pos;
   Rectangle size;
@@ -126,6 +128,11 @@ void UpdateGame(void) {
       InitGame();
     }
   } else {
+    if (IsKeyPressed(KEY_LEFT) || IsKeyDown(KEY_LEFT)) {
+      player.pos.x -= PLAYER_SPEED;
+    } else if (IsKeyPressed(KEY_RIGHT) || IsKeyDown(KEY_RIGHT)) {
+      player.pos.x += PLAYER_SPEED;
+    }
     if (IsKeyPressed(KEY_SPACE) && player.can_shoot) {
       player.can_shoot = false;
       lazer.x = player.pos.x + player.size.width;
