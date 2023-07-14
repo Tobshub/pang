@@ -115,9 +115,11 @@ void DrawGame(void) {
 
   if (game_over) {
     if (has_won) {
-      DrawText("YOU WIN", 300, 300, 24, GREEN);
+      DrawText("YOU WIN", SCREEN_WIDTH / 2 - 7 * 12, SCREEN_HEIGHT / 2, 24,
+               GREEN);
     } else {
-      DrawText("GAME OVER", 300, 300, 24, RED);
+      DrawText("GAME OVER", SCREEN_WIDTH / 2 - 9 * 12, SCREEN_HEIGHT / 2, 24,
+               RED);
     }
 
   } else {
