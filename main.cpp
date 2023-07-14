@@ -200,24 +200,24 @@ void UpdateGame(void) {
           ResetLazer();
           ball.active = false;
 
-          if (ball.r == BallSize::SMALL)
-            continue;
-
           // create a smaller ball on each side
           // moving in opposite directions
-          for (int i : {0, 1}) {
-            std::cout << "created new ball " << i << std::endl;
-            balls.push_back(Ball{
-                .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
-                                               : BallSize::SMALL,
-                .pos = Vector2{.x = ball.pos.x + (i == 0 ? (-1 * (float)ball.r)
-                                                         : (float)ball.r),
-                               .y = ball.pos.y},
-                .vv = 0,
-                .vh = ball.vh * (i == 0        ? ball.vh > 0 ? -1 : 1
-                                 : ball.vh > 0 ? 1
-                                               : -1),
-                .active = true});
+          if (ball.r != BallSize::SMALL) {
+            for (int i : {0, 1}) {
+              std::cout << "created new ball " << i << std::endl;
+              balls.push_back(Ball{
+                  .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
+                                                 : BallSize::SMALL,
+                  .pos =
+                      Vector2{.x = ball.pos.x + (i == 0 ? (-1 * (float)ball.r)
+                                                        : (float)ball.r),
+                              .y = ball.pos.y},
+                  .vv = 0,
+                  .vh = ball.vh * (i == 0        ? ball.vh > 0 ? -1 : 1
+                                   : ball.vh > 0 ? 1
+                                                 : -1),
+                  .active = true});
+            }
           }
         } else {
 
