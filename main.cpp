@@ -26,6 +26,7 @@ struct Ball {
   Vector2 pos;
   float vv; // vertical velocity
   float vh; // horizontal velocity
+  bool active;
 };
 
 #define LAZER_SPEED 5
@@ -100,7 +101,8 @@ void InitGame(void) {
                                      SCREEN_WIDTH - BallSize::LARGE),
                     .y = RandomFloat(0 + BallSize::LARGE, SCREEN_HEIGHT / 4.f)},
         .vv = 0,
-        .vh = RANDOM_BALL_VH()});
+        .vh = RANDOM_BALL_VH(),
+        .active = true});
   }
 }
 
@@ -112,7 +114,9 @@ void DrawGame(void) {
     DrawText("GAME OVER", 300, 300, 24, RED);
   } else {
     for (auto &ball : balls) {
-      DrawCircleV(ball.pos, ball.r, GRAY);
+      if (ball.active) {
+        DrawCircleV(ball.pos, ball.r, GRAY);
+      }
     }
 
     DrawTriangle({.x = player.pos.x + player.size.width,
@@ -130,6 +134,18 @@ void DrawGame(void) {
   EndDrawing();
 }
 
+void ResetLazer(void) {
+  lazer.active = false;
+  lazer.height = 0;
+  player.can_shoot = true;
+}
+
+void ActivateLazer(float x) {
+  lazer.active = true;
+  lazer.x = x;
+  player.can_shoot = false;
+}
+
 void UpdateGame(void) {
   if (game_over) {
     if (IsKeyPressed(KEY_ENTER)) {
@@ -142,56 +158,52 @@ void UpdateGame(void) {
       player.pos.x += PLAYER_SPEED;
     }
     if (IsKeyPressed(KEY_SPACE) && player.can_shoot) {
-      player.can_shoot = false;
-      lazer.x = player.pos.x + player.size.width;
-      lazer.active = true;
+      ActivateLazer(player.pos.x + player.size.width);
     }
 
     if (lazer.active) {
       if (lazer.height >= SCREEN_HEIGHT) {
-        lazer.active = false;
-        lazer.height = 0;
-        player.can_shoot = true;
+        ResetLazer();
       } else {
         lazer.height += LAZER_SPEED;
       }
     }
 
-    for (std::vector<Ball>::iterator ball = balls.begin(); ball != balls.end();
-         ++ball) {
+    for (auto &ball : balls) {
+      if (!ball.active)
+        continue;
+
       if (CheckCollisionCircleRec(
-              ball->pos, ball->r,
+              ball.pos, ball.r,
               Rectangle{.x = player.pos.x,
                         .y = player.pos.y - player.size.height,
                         .width = player.size.width * 2,
                         .height = player.size.height})) {
         game_over = true;
       } else if (CheckCollisionCircleRec(
-                     ball->pos, ball->r,
+                     ball.pos, ball.r,
                      Rectangle{.x = lazer.x,
                                .y = SCREEN_HEIGHT - lazer.height,
                                .width = 1,
                                .height = lazer.height})) {
-        lazer.active = false;
-        balls.erase(ball);
-
+        ResetLazer();
+        ball.active = false;
       } else {
 
-        if (ball->pos.y + (float)ball->r >= SCREEN_HEIGHT && ball->vv > 0) {
-          ball->vv *= -1;
-          ball->vv > 0 ? ball->vv -= G *ELASTICITY
-                       : ball->vv += G * ELASTICITY; // account for elasticity
+        if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
+          ball.vv *= -1;
+          ball.vv > 0 ? ball.vv -= G *ELASTICITY
+                      : ball.vv += G * ELASTICITY; // account for elasticity
         }
-        if (ball->pos.x - (float)ball->r <= 0 ||
-            ball->pos.x + (float)ball->r >= SCREEN_WIDTH) {
-          ball->vh *= -1;
+        if (ball.pos.x - (float)ball.r <= 0 ||
+            ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
+          ball.vh *= -1;
         }
-        ball->pos = {
-            .x = std::max<float>(ball->pos.x + ball->vh, ball->r),
-            .y = std::min<float>(ball->pos.y + ball->vv,
-                                 (float)SCREEN_HEIGHT - (float)ball->r)};
+        ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, ball.r),
+                    .y = std::min<float>(ball.pos.y + ball.vv,
+                                         (float)SCREEN_HEIGHT - ball.r)};
 
-        ball->vv += G;
+        ball.vv += G;
       }
     }
   }
