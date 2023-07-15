@@ -10,7 +10,7 @@ struct Player {
   bool can_shoot;
 };
 
-struct Lazer {
+struct Laser {
   float x;
   float height;
   bool active;
@@ -37,7 +37,7 @@ struct ShowPoints {
 
 #define PLAYER_SPEED 5
 #define START_BALL_NUM 2
-#define LAZER_SPEED 8
+#define Laser_SPEED 8
 
 #define SHOW_POINTS_DURATION 40
 #define SHOW_POINTS_FLOAT_SPEED 2
@@ -47,7 +47,7 @@ static const int SCREEN_HEIGHT = 480;
 
 static Player player = Player{};
 static std::list<Ball> balls;
-static Lazer lazer = Lazer{.x = 0, .height = 0, .active = false};
+static Laser laser = Laser{.x = 0, .height = 0, .active = false};
 
 static std::vector<ShowPoints> show_points;
 
@@ -79,7 +79,7 @@ void InitGame(void) {
       .can_shoot = true,
   };
 
-  lazer = Lazer{
+  laser = Laser{
       .x = 0,
       .height = 0,
       .active = false,
@@ -129,9 +129,9 @@ void DrawGame(void) {
                  {.x = player.pos.x + player.size.width * 2, .y = player.pos.y},
                  RED);
 
-    if (lazer.active) {
-      DrawLineV({.x = lazer.x, .y = SCREEN_HEIGHT},
-                {.x = lazer.x, .y = SCREEN_HEIGHT - lazer.height}, RED);
+    if (laser.active) {
+      DrawLineV({.x = laser.x, .y = SCREEN_HEIGHT},
+                {.x = laser.x, .y = SCREEN_HEIGHT - laser.height}, RED);
     }
 
     for (auto &show_point : show_points) {
@@ -145,15 +145,15 @@ void DrawGame(void) {
   EndDrawing();
 }
 
-void ResetLazer(void) {
-  lazer.active = false;
-  lazer.height = 0;
+void ResetLaser(void) {
+  laser.active = false;
+  laser.height = 0;
   player.can_shoot = true;
 }
 
-void ActivateLazer(float x) {
-  lazer.active = true;
-  lazer.x = x;
+void ActivateLaser(float x) {
+  laser.active = true;
+  laser.x = x;
   player.can_shoot = false;
 }
 
@@ -170,14 +170,14 @@ void UpdateGame(void) {
                                      SCREEN_WIDTH - player.size.width * 2);
     }
     if (IsKeyPressed(KEY_SPACE) && player.can_shoot) {
-      ActivateLazer(player.pos.x + player.size.width);
+      ActivateLaser(player.pos.x + player.size.width);
     }
 
-    if (lazer.active) {
-      if (lazer.height >= SCREEN_HEIGHT) {
-        ResetLazer();
+    if (laser.active) {
+      if (laser.height >= SCREEN_HEIGHT) {
+        ResetLaser();
       } else {
-        lazer.height += LAZER_SPEED;
+        laser.height += Laser_SPEED;
       }
     }
 
@@ -200,11 +200,11 @@ void UpdateGame(void) {
           break;
         } else if (CheckCollisionCircleRec(
                        ball.pos, r,
-                       Rectangle{.x = lazer.x,
-                                 .y = SCREEN_HEIGHT - lazer.height,
+                       Rectangle{.x = laser.x,
+                                 .y = SCREEN_HEIGHT - laser.height,
                                  .width = 1,
-                                 .height = lazer.height})) {
-          ResetLazer();
+                                 .height = laser.height})) {
+          ResetLaser();
           ball.active = false;
           int points_gained = (static_cast<int>(r) / 10) * 50;
           score += points_gained;
