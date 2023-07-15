@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iostream>
+#include <list>
 #include <raylib.h>
-#include <vector>
 
 void InitGame(void);
 void UpdateGame(void);
@@ -20,8 +20,7 @@ struct Player {
 
 #define START_BALL_NUM 2
 
-enum BallSize { SMALL = 0, MEDIUM = 1, LARGE = 2 };
-static const float ball_sizes[3] = {10.f, 20.f, 40.f};
+enum BallSize { SMALL = 10, MEDIUM = 20, LARGE = 40 };
 
 struct Ball {
   BallSize r;
@@ -44,7 +43,7 @@ static const int SCREEN_HEIGHT = 480;
 
 static Player player = Player{};
 
-static std::vector<Ball> balls;
+static std::list<Ball> balls;
 
 static Lazer lazer = Lazer{.x = 0, .height = 0, .active = false};
 
@@ -70,7 +69,8 @@ int main(void) {
 float RandomNZFloat(float min, float max) {
   float n = 0.f;
   while (n == 0.f) {
-    n = min + ((float)rand() / (float)RAND_MAX) * (max - min);
+    n = min + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) *
+                  (max - min);
   }
   return n;
 }
@@ -100,10 +100,9 @@ void InitGame(void) {
   for (int i = 0; i < START_BALL_NUM; i++) {
     balls.push_back(
         Ball{.r = BallSize::LARGE,
-             .pos = Vector2{.x = RandomNZFloat(0 + ball_sizes[BallSize::LARGE],
-                                               SCREEN_WIDTH -
-                                                   ball_sizes[BallSize::LARGE]),
-                            .y = RandomNZFloat(0 + ball_sizes[BallSize::LARGE],
+             .pos = Vector2{.x = RandomNZFloat(0 + BallSize::LARGE,
+                                               SCREEN_WIDTH - BallSize::LARGE),
+                            .y = RandomNZFloat(0 + BallSize::LARGE,
                                                SCREEN_HEIGHT / 4.f)},
              .vv = 0,
              .vh = RANDOM_BALL_VH(),
@@ -127,7 +126,7 @@ void DrawGame(void) {
   } else {
     for (auto &ball : balls) {
       if (ball.active) {
-        DrawCircleV(ball.pos, ball_sizes[ball.r], DARKGRAY);
+        DrawCircleV(ball.pos, static_cast<float>(ball.r), DARKGRAY);
       }
     }
 
@@ -186,10 +185,10 @@ void UpdateGame(void) {
     game_over = true;
     for (auto &ball : balls) {
       if (ball.active) {
-        float r = ball_sizes[ball.r];
-
         has_won = false;
         game_over = false;
+
+        float r = static_cast<float>(ball.r);
 
         if (CheckCollisionCircleRec(
                 ball.pos, r,
@@ -211,26 +210,20 @@ void UpdateGame(void) {
           // create a smaller ball on each side
           // moving in opposite directions
           if (ball.r != BallSize::SMALL) {
-            BallSize next_size =
-                ball.r == BallSize::LARGE ? BallSize::MEDIUM : BallSize::SMALL;
-            float y = ball.pos.y;
-            std::cout << "parent ball: " << ball.pos.x << "," << ball.pos.y
-                      << "," << r << "," << ball.vv << "," << ball.vh
-                      << std::endl;
             for (int i : {0, 1}) {
-              std::cout << "vals: " << i << "," << r << ","
-                        << (i == 0 ? (-1 * r) : r) << std::endl;
               Ball new_ball =
-                  Ball{.r = next_size,
-                       .pos = Vector2{.x = ball.pos.x + (i == 0 ? (-1 * r) : r),
-                                      .y = y},
+                  Ball{.r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
+                                                      : BallSize::SMALL,
+                       .pos = Vector2{.x = ball.pos.x +
+                                           static_cast<float>(
+                                               (i == 0 ? (-1.f * r) : r)),
+                                      .y = ball.pos.y},
                        .vv = 0,
-                       .vh = ball.vh * (float)(i == 0 ? ball.vh > 0 ? -1 : 1
-                                               : ball.vh > 0 ? 1
-                                                             : -1),
+                       .vh = ball.vh *
+                             static_cast<float>((i == 0 ? ball.vh > 0 ? -1 : 1
+                                                 : ball.vh > 0 ? 1
+                                                               : -1)),
                        .active = true};
-              std::cout << new_ball.pos.x << "," << new_ball.pos.y << ","
-                        << new_ball.vh << std::endl;
               balls.push_back(new_ball);
             }
           }
@@ -247,9 +240,10 @@ void UpdateGame(void) {
             ball.vh *= -1;
           }
 
-          ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, r),
-                      .y = std::min<float>(ball.pos.y + ball.vv,
-                                           (float)SCREEN_HEIGHT - r)};
+          ball.pos = {
+              .x = std::max<float>(ball.pos.x + ball.vh, r),
+              .y = std::min<float>(ball.pos.y + ball.vv,
+                                   static_cast<float>(SCREEN_HEIGHT - r))};
 
           ball.vv += G;
         }
