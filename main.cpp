@@ -2,6 +2,7 @@
 #include <iostream>
 #include <list>
 #include <raylib.h>
+#include <vector>
 
 struct Player {
   Vector2 pos;
@@ -25,6 +26,12 @@ struct Ball {
   bool active;
 };
 
+struct ShowPoints {
+  int points_gained;
+  int duration;
+  Vector2 position;
+};
+
 #define G .4
 #define ELASTICITY 2.f
 
@@ -32,12 +39,17 @@ struct Ball {
 #define START_BALL_NUM 2
 #define LAZER_SPEED 8
 
+#define SHOW_POINTS_DURATION 40
+#define SHOW_POINTS_FLOAT_SPEED 2
+
 static const int SCREEN_WIDTH = 800;
 static const int SCREEN_HEIGHT = 480;
 
 static Player player = Player{};
 static std::list<Ball> balls;
 static Lazer lazer = Lazer{.x = 0, .height = 0, .active = false};
+
+static std::vector<ShowPoints> show_points;
 
 static int score = 0;
 static bool game_over = false;
@@ -73,6 +85,7 @@ void InitGame(void) {
       .active = false,
   };
 
+  show_points.clear();
   balls.clear();
 
   for (int i = 0; i < START_BALL_NUM; i++) {
@@ -119,6 +132,13 @@ void DrawGame(void) {
     if (lazer.active) {
       DrawLineV({.x = lazer.x, .y = SCREEN_HEIGHT},
                 {.x = lazer.x, .y = SCREEN_HEIGHT - lazer.height}, RED);
+    }
+
+    for (auto &show_point : show_points) {
+      if (show_point.duration > 0) {
+        DrawText(TextFormat("+%d", show_point.points_gained),
+                 show_point.position.x, show_point.position.y, 20, DARKGREEN);
+      }
     }
   }
 
@@ -186,7 +206,11 @@ void UpdateGame(void) {
                                  .height = lazer.height})) {
           ResetLazer();
           ball.active = false;
-          score += (static_cast<int>(r) / 10) * 50;
+          int points_gained = (static_cast<int>(r) / 10) * 50;
+          score += points_gained;
+          show_points.push_back(ShowPoints{.points_gained = points_gained,
+                                           .duration = SHOW_POINTS_DURATION,
+                                           .position = ball.pos});
 
           // create a smaller ball on each side
           // moving in opposite directions
@@ -228,6 +252,13 @@ void UpdateGame(void) {
 
           ball.vv += G;
         }
+      }
+    }
+
+    for (auto &show_point : show_points) {
+      if (show_point.duration > 0) {
+        show_point.duration -= 1;
+        show_point.position.y -= SHOW_POINTS_FLOAT_SPEED;
       }
     }
   }
