@@ -3,22 +3,17 @@
 #include <list>
 #include <raylib.h>
 
-void InitGame(void);
-void UpdateGame(void);
-void DrawGame(void);
-
-#define PLAYER_SPEED 5
-
 struct Player {
   Vector2 pos;
   Rectangle size;
   bool can_shoot;
 };
 
-#define G .4
-#define ELASTICITY 2.f
-
-#define START_BALL_NUM 2
+struct Lazer {
+  float x;
+  float height;
+  bool active;
+};
 
 enum BallSize { SMALL = 10, MEDIUM = 20, LARGE = 40 };
 
@@ -30,43 +25,23 @@ struct Ball {
   bool active;
 };
 
-#define LAZER_SPEED 8
+#define G .4
+#define ELASTICITY 2.f
 
-struct Lazer {
-  float x;
-  float height;
-  bool active;
-};
+#define PLAYER_SPEED 5
+#define START_BALL_NUM 2
+#define LAZER_SPEED 8
 
 static const int SCREEN_WIDTH = 800;
 static const int SCREEN_HEIGHT = 480;
 
 static Player player = Player{};
-
-static int score = 0;
-
 static std::list<Ball> balls;
-
 static Lazer lazer = Lazer{.x = 0, .height = 0, .active = false};
 
+static int score = 0;
 static bool game_over = false;
 static bool has_won = false;
-
-int main(void) {
-
-  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pang");
-
-  SetTargetFPS(60);
-  InitGame();
-
-  while (!WindowShouldClose()) {
-    UpdateGame();
-    DrawGame();
-  }
-
-  CloseWindow();
-  return 0;
-}
 
 float RandomNZFloat(float min, float max) {
   float n = 0.f;
@@ -256,4 +231,20 @@ void UpdateGame(void) {
       }
     }
   }
+}
+
+int main(void) {
+
+  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pang");
+
+  SetTargetFPS(60);
+  InitGame();
+
+  while (!WindowShouldClose()) {
+    UpdateGame();
+    DrawGame();
+  }
+
+  CloseWindow();
+  return 0;
 }
