@@ -43,6 +43,8 @@ static const int SCREEN_HEIGHT = 480;
 
 static Player player = Player{};
 
+static int score = 0;
+
 static std::list<Ball> balls;
 
 static Lazer lazer = Lazer{.x = 0, .height = 0, .active = false};
@@ -81,6 +83,7 @@ void InitGame(void) {
 
   game_over = false;
   has_won = false;
+  score = 0;
 
   player = Player{
       .pos = {.x = SCREEN_WIDTH / 2.f - player.size.width / 2,
@@ -113,6 +116,8 @@ void InitGame(void) {
 void DrawGame(void) {
   BeginDrawing();
   ClearBackground(RAYWHITE);
+
+  DrawText(TextFormat("SCORE: %d", score), 10, 10, 20, GRAY);
 
   if (game_over) {
     if (has_won) {
@@ -206,6 +211,7 @@ void UpdateGame(void) {
                                  .height = lazer.height})) {
           ResetLazer();
           ball.active = false;
+          score += (static_cast<int>(r) / 10) * 50;
 
           // create a smaller ball on each side
           // moving in opposite directions
