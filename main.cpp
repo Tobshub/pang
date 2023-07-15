@@ -37,7 +37,7 @@ struct ShowPoints {
 
 #define PLAYER_SPEED 5
 #define START_BALL_NUM 2
-#define Laser_SPEED 8
+#define LASER_SPEED 8
 
 #define SHOW_POINTS_DURATION 40
 #define SHOW_POINTS_FLOAT_SPEED 2
@@ -177,7 +177,7 @@ void UpdateGame(void) {
       if (laser.height >= SCREEN_HEIGHT) {
         ResetLaser();
       } else {
-        laser.height += Laser_SPEED;
+        laser.height += LASER_SPEED;
       }
     }
 
