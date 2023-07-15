@@ -20,7 +20,8 @@ struct Player {
 
 #define START_BALL_NUM 2
 
-enum BallSize { SMALL = 10, MEDIUM = 20, LARGE = 40 };
+enum BallSize { SMALL = 0, MEDIUM = 1, LARGE = 2 };
+static const float ball_sizes[3] = {10.f, 20.f, 40.f};
 
 struct Ball {
   BallSize r;
@@ -99,9 +100,10 @@ void InitGame(void) {
   for (int i = 0; i < START_BALL_NUM; i++) {
     balls.push_back(
         Ball{.r = BallSize::LARGE,
-             .pos = Vector2{.x = RandomNZFloat(0 + BallSize::LARGE,
-                                               SCREEN_WIDTH - BallSize::LARGE),
-                            .y = RandomNZFloat(0 + BallSize::LARGE,
+             .pos = Vector2{.x = RandomNZFloat(0 + ball_sizes[BallSize::LARGE],
+                                               SCREEN_WIDTH -
+                                                   ball_sizes[BallSize::LARGE]),
+                            .y = RandomNZFloat(0 + ball_sizes[BallSize::LARGE],
                                                SCREEN_HEIGHT / 4.f)},
              .vv = 0,
              .vh = RANDOM_BALL_VH(),
@@ -125,7 +127,7 @@ void DrawGame(void) {
   } else {
     for (auto &ball : balls) {
       if (ball.active) {
-        DrawCircleV(ball.pos, ball.r, DARKGRAY);
+        DrawCircleV(ball.pos, ball_sizes[ball.r], DARKGRAY);
       }
     }
 
@@ -184,12 +186,13 @@ void UpdateGame(void) {
     game_over = true;
     for (auto &ball : balls) {
       if (ball.active) {
+        float r = ball_sizes[ball.r];
 
         has_won = false;
         game_over = false;
 
         if (CheckCollisionCircleRec(
-                ball.pos, ball.r,
+                ball.pos, r,
                 Rectangle{.x = player.pos.x,
                           .y = player.pos.y - player.size.height,
                           .width = player.size.width * 2,
@@ -197,7 +200,7 @@ void UpdateGame(void) {
           game_over = true;
           break;
         } else if (CheckCollisionCircleRec(
-                       ball.pos, ball.r,
+                       ball.pos, r,
                        Rectangle{.x = lazer.x,
                                  .y = SCREEN_HEIGHT - lazer.height,
                                  .width = 1,
@@ -208,38 +211,45 @@ void UpdateGame(void) {
           // create a smaller ball on each side
           // moving in opposite directions
           if (ball.r != BallSize::SMALL) {
+            BallSize next_size =
+                ball.r == BallSize::LARGE ? BallSize::MEDIUM : BallSize::SMALL;
+            float y = ball.pos.y;
+            std::cout << "parent ball: " << ball.pos.x << "," << ball.pos.y
+                      << "," << r << "," << ball.vv << "," << ball.vh
+                      << std::endl;
             for (int i : {0, 1}) {
-              balls.push_back(Ball{
-                  .r = ball.r == BallSize::LARGE ? BallSize::MEDIUM
-                                                 : BallSize::SMALL,
-                  .pos =
-                      Vector2{.x = ball.pos.x + (i == 0 ? (-1 * (float)ball.r)
-                                                        : (float)ball.r),
-                              .y = ball.pos.y},
-                  .vv = 0,
-                  .vh = ball.vh * (i == 0        ? ball.vh > 0 ? -1 : 1
-                                   : ball.vh > 0 ? 1
-                                                 : -1),
-                  .active = true});
+              std::cout << "vals: " << i << "," << r << ","
+                        << (i == 0 ? (-1 * r) : r) << std::endl;
+              Ball new_ball =
+                  Ball{.r = next_size,
+                       .pos = Vector2{.x = ball.pos.x + (i == 0 ? (-1 * r) : r),
+                                      .y = y},
+                       .vv = 0,
+                       .vh = ball.vh * (float)(i == 0 ? ball.vh > 0 ? -1 : 1
+                                               : ball.vh > 0 ? 1
+                                                             : -1),
+                       .active = true};
+              std::cout << new_ball.pos.x << "," << new_ball.pos.y << ","
+                        << new_ball.vh << std::endl;
+              balls.push_back(new_ball);
             }
           }
         } else {
 
-          if (ball.pos.y + (float)ball.r >= SCREEN_HEIGHT && ball.vv > 0) {
+          if (ball.pos.y + r >= SCREEN_HEIGHT && ball.vv > 0) {
             ball.vv *= -1;
             ball.vv > 0 ? ball.vv -= G *ELASTICITY
                         : ball.vv += G * ELASTICITY; // account for elasticity
           }
 
-          if (ball.pos.x - (float)ball.r <= 0 ||
-              ball.pos.x + (float)ball.r >= SCREEN_WIDTH) {
+          if ((ball.pos.x - r <= 0 && ball.vh < 0) ||
+              (ball.pos.x + r >= SCREEN_WIDTH && ball.vh > 0)) {
             ball.vh *= -1;
           }
 
-          ball.pos = {
-              .x = std::max<float>(ball.pos.x + ball.vh, ball.r),
-              .y = std::min<float>(ball.pos.y + ball.vv,
-                                   (float)SCREEN_HEIGHT - (float)ball.r)};
+          ball.pos = {.x = std::max<float>(ball.pos.x + ball.vh, r),
+                      .y = std::min<float>(ball.pos.y + ball.vv,
+                                           (float)SCREEN_HEIGHT - r)};
 
           ball.vv += G;
         }
