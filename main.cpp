@@ -89,7 +89,7 @@ void InitGame(void) {
 
   for (int i = 0; i < START_BALL_NUM; i++) {
     float vh = 0.f;
-    while (vh > -.5 && vh < .5) {
+    while (vh > -1.f && vh < 1.f) {
       vh = RANDOM_BALL_VH();
     }
     balls.push_back(
