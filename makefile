@@ -10,7 +10,7 @@ CFLAGS = -std=c++20 -Wall -Wextra -Wno-missing-braces -g
 LDFLAGS = -lraylib 
 
 # Target
-TARGET = out
+TARGET = pang
 FILES = main.cpp
 COMPS = main.o
 
