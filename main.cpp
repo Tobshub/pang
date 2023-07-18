@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <iostream>
 #include <list>
 #include <raylib.h>
 #include <vector>
@@ -33,7 +32,7 @@ struct ShowPoints {
 };
 
 #define G .4
-#define ELASTICITY 2.f
+#define ELASTICITY .5
 
 #define PLAYER_SPEED 5
 #define START_BALL_NUM 2
@@ -240,8 +239,8 @@ void UpdateGame(void) {
 
           if (ball.pos.y + r >= SCREEN_HEIGHT && ball.vv > 0) {
             ball.vv *= -1;
-            ball.vv > 0 ? ball.vv -= G *ELASTICITY
-                        : ball.vv += G * ELASTICITY; // account for elasticity
+            ball.vv > 0 ? ball.vv -= G / ELASTICITY
+                        : ball.vv += G / ELASTICITY; // account for elasticity
           }
 
           if ((ball.pos.x - r <= 0 && ball.vh < 0) ||
