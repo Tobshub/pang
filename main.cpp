@@ -89,6 +89,10 @@ void InitGame(void) {
   balls.clear();
 
   for (int i = 0; i < START_BALL_NUM; i++) {
+    float vh = 0.f;
+    while (vh > -.5 && vh < .5) {
+      vh = RANDOM_BALL_VH();
+    }
     balls.push_back(
         Ball{.r = BallSize::LARGE,
              .pos = Vector2{.x = RandomNZFloat(0 + BallSize::LARGE,
@@ -96,7 +100,7 @@ void InitGame(void) {
                             .y = RandomNZFloat(0 + BallSize::LARGE,
                                                SCREEN_HEIGHT / 4.f)},
              .vv = 0,
-             .vh = RANDOM_BALL_VH(),
+             .vh = vh,
              .active = true});
   }
 }
